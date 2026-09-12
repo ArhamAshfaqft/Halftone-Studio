@@ -4,6 +4,7 @@ import JSZip from 'jszip';
 import { StudioSettings } from '../types';
 import { canvasTo300DpiPng } from '../engine/pngDpi';
 import { CMYKPlates } from '../engine/cmykSeparation';
+import { drawGarmentBase, drawClothFolds, applyPrintMaterialBlending } from '../engine/fabricTexture';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -52,9 +53,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     const ctx = c.getContext('2d');
     if (!ctx) return c;
 
-    // Garment background
-    ctx.fillStyle = settings.garmentColor;
-    ctx.fillRect(0, 0, width, height);
+    // Garment background & natural cloth folds
+    drawGarmentBase(
+      ctx,
+      width,
+      height,
+      settings.garmentColor,
+      settings.garmentTexture,
+      settings.garmentTextureOpacity
+    );
+    if (settings.garmentFolds) {
+      drawClothFolds(ctx, width, height, settings.garmentFoldIntensity);
+    }
 
     // Underbase
     if (settings.underbaseEnabled && underbaseData) {
@@ -70,6 +80,17 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       const htCanvas = createImgCanvas(halftoneData);
       ctx.drawImage(htCanvas, 0, 0);
     }
+
+    // Apply natural cloth fold shading & fabric weave texture OVER print ink
+    applyPrintMaterialBlending(
+      ctx,
+      width,
+      height,
+      settings.garmentFolds,
+      settings.garmentFoldIntensity,
+      settings.garmentTexture,
+      settings.garmentTextureOpacity
+    );
     return c;
   };
 

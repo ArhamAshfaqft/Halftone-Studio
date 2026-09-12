@@ -56,6 +56,8 @@ export interface StudioSettings {
   garmentTexture: boolean;
   garmentTextureOpacity: number; // 0 - 100
   showGarmentBox: boolean;
+  garmentFolds: boolean;
+  garmentFoldIntensity: number; // 0 - 100
 
   // CMYK Mode
   cmykMode: boolean;

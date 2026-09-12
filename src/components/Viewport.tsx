@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ViewMode, StudioSettings } from '../types';
 import { Columns, Search, RefreshCw, Maximize2, Square, Upload } from 'lucide-react';
 import { CMYKPlates } from '../engine/cmykSeparation';
+import { drawGarmentBase, drawClothFolds, applyPrintMaterialBlending } from '../engine/fabricTexture';
 
 interface ViewportProps {
   originalImage: HTMLImageElement | null;
@@ -115,19 +116,17 @@ export const Viewport: React.FC<ViewportProps> = ({
     const drawGarmentBg = (targetCtx: CanvasRenderingContext2D) => {
       if (!settings.showGarmentBox) return;
 
-      targetCtx.fillStyle = settings.garmentColor;
-      targetCtx.fillRect(0, 0, width, height);
+      drawGarmentBase(
+        targetCtx,
+        width,
+        height,
+        settings.garmentColor,
+        settings.garmentTexture,
+        settings.garmentTextureOpacity
+      );
 
-      if (settings.garmentTexture) {
-        targetCtx.save();
-        targetCtx.fillStyle = 'rgba(255, 255, 255, 0.035)';
-        for (let i = 0; i < width; i += 4) {
-          targetCtx.fillRect(i, 0, 1, height);
-        }
-        for (let j = 0; j < height; j += 4) {
-          targetCtx.fillRect(0, j, width, 1);
-        }
-        targetCtx.restore();
+      if (settings.garmentFolds) {
+        drawClothFolds(targetCtx, width, height, settings.garmentFoldIntensity);
       }
     };
 
@@ -170,6 +169,17 @@ export const Viewport: React.FC<ViewportProps> = ({
           htTemp.getContext('2d')?.putImageData(halftoneData, 0, 0);
           targetCtx.drawImage(htTemp, 0, 0);
         }
+
+        // Apply natural cloth fold shading & fabric weave texture OVER print ink
+        applyPrintMaterialBlending(
+          targetCtx,
+          width,
+          height,
+          settings.garmentFolds,
+          settings.garmentFoldIntensity,
+          settings.garmentTexture,
+          settings.garmentTextureOpacity
+        );
       } else if (mode === 'cmyk' && cmykPlates) {
         const plate = cmykPlates[settings.cmykActiveChannel] || cmykPlates.composite;
         const temp = document.createElement('canvas');

@@ -544,19 +544,66 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center justify-between bg-studio-card p-2 rounded-sm border border-studio-border">
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="garment-texture"
-                checked={settings.garmentTexture}
-                onChange={(e) => onChange({ garmentTexture: e.target.checked })}
-                className="rounded-sm accent-studio-accent cursor-pointer"
-              />
-              <label htmlFor="garment-texture" className="text-studio-muted cursor-pointer">
-                Fabric Weave Texture
-              </label>
+          <div className="space-y-2 bg-studio-card p-2 rounded-sm border border-studio-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="garment-texture"
+                  checked={settings.garmentTexture}
+                  onChange={(e) => onChange({ garmentTexture: e.target.checked })}
+                  className="rounded-sm accent-studio-accent cursor-pointer"
+                />
+                <label htmlFor="garment-texture" className="text-studio-muted cursor-pointer text-xs">
+                  Knit Cotton Weave
+                </label>
+              </div>
+              {settings.garmentTexture && (
+                <span className="text-[10px] font-mono text-studio-accent">{settings.garmentTextureOpacity}%</span>
+              )}
             </div>
+            {settings.garmentTexture && (
+              <input
+                type="range"
+                min="10"
+                max="80"
+                step="5"
+                value={settings.garmentTextureOpacity}
+                onChange={(e) => onChange({ garmentTextureOpacity: Number(e.target.value) })}
+                className="w-full"
+              />
+            )}
+          </div>
+
+          <div className="space-y-2 bg-studio-card p-2 rounded-sm border border-studio-border">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="garment-folds"
+                  checked={settings.garmentFolds}
+                  onChange={(e) => onChange({ garmentFolds: e.target.checked })}
+                  className="rounded-sm accent-studio-accent cursor-pointer"
+                />
+                <label htmlFor="garment-folds" className="text-studio-muted cursor-pointer text-xs">
+                  Natural Cloth Folds & Shading
+                </label>
+              </div>
+              {settings.garmentFolds && (
+                <span className="text-[10px] font-mono text-studio-accent">{settings.garmentFoldIntensity}%</span>
+              )}
+            </div>
+            {settings.garmentFolds && (
+              <input
+                type="range"
+                min="10"
+                max="75"
+                step="5"
+                value={settings.garmentFoldIntensity}
+                onChange={(e) => onChange({ garmentFoldIntensity: Number(e.target.value) })}
+                className="w-full"
+              />
+            )}
           </div>
         </section>
 

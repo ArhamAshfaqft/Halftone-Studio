@@ -11,40 +11,63 @@ import { generateWhiteUnderbase } from './engine/underbaseEngine';
 import { processCmykSeparations, CMYKPlates } from './engine/cmykSeparation';
 import { analyzeAndAutoTune } from './engine/autoTone';
 
+const DEFAULT_STUDIO_SETTINGS: StudioSettings = {
+  lpi: 45,
+  angle: 45,
+  shape: 'round',
+  dotScale: 1.0,
+  dotFade: 25,
+  fadeFeather: 15,
+  knockoutMode: 'black',
+  knockoutColor: '#000000',
+  knockoutThreshold: 18,
+  knockoutSoftness: 12,
+  underbaseEnabled: true,
+  underbaseChoke: 2,
+  underbaseDensity: 100,
+  microDotCleanup: true,
+  microDotThreshold: 2,
+  brightness: 0,
+  contrast: 0,
+  gamma: 1.0,
+  blackCutoff: 10,
+  inputBlack: 0,
+  inputWhite: 255,
+  outputMin: 0,
+  outputMax: 255,
+  invert: false,
+  garmentColor: '#121316',
+  garmentTexture: true,
+  garmentTextureOpacity: 35,
+  showGarmentBox: false,
+  garmentFolds: true,
+  garmentFoldIntensity: 35,
+  cmykMode: false,
+  cmykActiveChannel: 'composite',
+};
+
 export const App: React.FC = () => {
-  // Current settings initialized to DTF Standard preset
-  const [settings, setSettings] = useState<StudioSettings>({
-    lpi: 45,
-    angle: 45,
-    shape: 'round',
-    dotScale: 1.0,
-    dotFade: 25,
-    fadeFeather: 15,
-    knockoutMode: 'black',
-    knockoutColor: '#000000',
-    knockoutThreshold: 18,
-    knockoutSoftness: 12,
-    underbaseEnabled: true,
-    underbaseChoke: 2,
-    underbaseDensity: 100,
-    microDotCleanup: true,
-    microDotThreshold: 2,
-    brightness: 0,
-    contrast: 0,
-    gamma: 1.0,
-    blackCutoff: 10,
-    inputBlack: 0,
-    inputWhite: 255,
-    outputMin: 0,
-    outputMax: 255,
-    invert: false,
-    garmentColor: '#121316',
-    garmentTexture: true,
-    garmentTextureOpacity: 25,
-    showGarmentBox: false,
-    cmykMode: false,
-    cmykActiveChannel: 'composite',
+  // Current settings restored from localStorage if previously saved, else defaults
+  const [settings, setSettings] = useState<StudioSettings>(() => {
+    try {
+      const saved = localStorage.getItem('halftone_studio_settings');
+      if (saved) {
+        return { ...DEFAULT_STUDIO_SETTINGS, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.warn('Could not restore saved settings:', e);
+    }
+    return DEFAULT_STUDIO_SETTINGS;
   });
+
+  // Automatically persist user settings on change
+  useEffect(() => {
+    try {
+      localStorage.setItem('halftone_studio_settings', JSON.stringify(settings));
+    } catch (e) {
+      console.warn('Could not persist settings:', e);
+    }
+  }, [settings]);
 
   const [currentPresetId, setCurrentPresetId] = useState<string>('dtf-standard');
   const [autoToneStatus, setAutoToneStatus] = useState<string | undefined>(undefined);
@@ -85,7 +108,10 @@ export const App: React.FC = () => {
   const handleResetToDefaults = () => {
     const defaultP = DEFAULT_PRESETS[0];
     setCurrentPresetId(defaultP.id);
-    setSettings((prev) => ({ ...prev, ...defaultP.settings }));
+    setSettings(DEFAULT_STUDIO_SETTINGS);
+    try {
+      localStorage.removeItem('halftone_studio_settings');
+    } catch (e) {}
     setAutoToneStatus(undefined);
   };
 
