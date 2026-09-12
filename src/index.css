@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-poppins: 'Poppins', sans-serif;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    color: #F1F5F9;
+    background-color: #0B0D11;
+    overflow: hidden;
+  }
+}
+
+/* Custom utilitarian scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #10131A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #252B38;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #363E50;
+}
+
+/* Utilitarian sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  background: #202634;
+  border-radius: 2px;
+  height: 4px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: #2563EB;
+  cursor: pointer;
+  border: 1px solid #3B82F6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: #1D4ED8;
+  transform: scale(1.1);
+}
+
+/* Number stepper inputs without arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Checkered background for transparency inspection */
+.bg-transparency-grid {
+  background-color: #0F1218;
+  background-image: 
+    linear-gradient(45deg, #161A22 25%, transparent 25%), 
+    linear-gradient(-45deg, #161A22 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #161A22 75%), 
+    linear-gradient(-45deg, transparent 75%, #161A22 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+}
