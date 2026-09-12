@@ -40,12 +40,20 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Loaded File Meta */}
         <div className="hidden md:flex items-center gap-3 text-xs text-studio-muted border-l border-studio-border pl-5">
-          <span className="truncate max-w-[180px] font-medium text-studio-text">
-            {fileName}
-          </span>
-          {imageDimensions.width > 0 && (
-            <span className="font-mono text-[11px] text-studio-muted bg-studio-card px-1.5 py-0.5 border border-studio-border rounded-sm">
-              {imageDimensions.width} × {imageDimensions.height} px · 300 DPI
+          {fileName ? (
+            <>
+              <span className="truncate max-w-[180px] font-medium text-studio-text">
+                {fileName}
+              </span>
+              {imageDimensions.width > 0 && (
+                <span className="font-mono text-[11px] text-studio-muted bg-studio-card px-1.5 py-0.5 border border-studio-border rounded-sm">
+                  {imageDimensions.width} × {imageDimensions.height} px · 300 DPI
+                </span>
+              )}
+            </>
+          ) : (
+            <span className="font-mono text-[11px] text-studio-muted/60">
+              No artwork loaded
             </span>
           )}
         </div>
@@ -125,7 +133,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Export Prepress Button */}
         <button
           onClick={onOpenExportModal}
-          className="flex items-center gap-1.5 text-xs font-semibold text-white bg-studio-accent hover:bg-studio-accent-hover px-4 py-1.5 rounded-sm transition-colors shadow-sm"
+          disabled={!fileName}
+          className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-1.5 rounded-sm transition-colors shadow-sm ${
+            !fileName
+              ? 'bg-studio-border text-studio-muted/50 cursor-not-allowed opacity-60'
+              : 'text-white bg-studio-accent hover:bg-studio-accent-hover'
+          }`}
         >
           <Download className="w-3.5 h-3.5" />
           <span>Export 300 DPI</span>

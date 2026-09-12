@@ -9,7 +9,6 @@ import { DEFAULT_PRESETS } from './presets';
 import { processHalftone } from './engine/halftoneCore';
 import { generateWhiteUnderbase } from './engine/underbaseEngine';
 import { processCmykSeparations, CMYKPlates } from './engine/cmykSeparation';
-import { generateSampleArtwork } from './engine/sampleArtwork';
 import { analyzeAndAutoTune } from './engine/autoTone';
 
 export const App: React.FC = () => {
@@ -50,10 +49,10 @@ export const App: React.FC = () => {
   const [currentPresetId, setCurrentPresetId] = useState<string>('dtf-standard');
   const [autoToneStatus, setAutoToneStatus] = useState<string | undefined>(undefined);
 
-  // Loaded Artwork state
+  // Loaded Artwork state (starts clean with no demo design)
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
-  const [fileName, setFileName] = useState<string>('sample_streetwear_eagle.png');
-  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number }>({ width: 1200, height: 1200 });
+  const [fileName, setFileName] = useState<string>('');
+  const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
 
   // Rendered Data
   const [halftoneData, setHalftoneData] = useState<ImageData | null>(null);
@@ -70,18 +69,6 @@ export const App: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Load sample graphic on startup
-  useEffect(() => {
-    const sampleDataUrl = generateSampleArtwork();
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      setOriginalImage(img);
-      setImageDimensions({ width: img.naturalWidth, height: img.naturalHeight });
-    };
-    img.src = sampleDataUrl;
-  }, []);
 
   // Update Settings
   const handleSettingsChange = (updated: Partial<StudioSettings>) => {
@@ -285,6 +272,7 @@ export const App: React.FC = () => {
           cmykPlates={cmykPlates}
           settings={settings}
           onSettingsChange={handleSettingsChange}
+          onOpenFile={handleOpenFile}
           zoom={zoom}
           onZoomChange={setZoom}
           viewMode={viewMode}

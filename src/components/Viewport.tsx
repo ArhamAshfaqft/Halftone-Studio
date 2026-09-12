@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ViewMode, StudioSettings } from '../types';
-import { Columns, Search, RefreshCw, Maximize2, Square } from 'lucide-react';
+import { Columns, Search, RefreshCw, Maximize2, Square, Upload } from 'lucide-react';
 import { CMYKPlates } from '../engine/cmykSeparation';
 
 interface ViewportProps {
@@ -10,6 +10,7 @@ interface ViewportProps {
   cmykPlates: CMYKPlates | null;
   settings: StudioSettings;
   onSettingsChange?: (s: Partial<StudioSettings>) => void;
+  onOpenFile?: () => void;
   zoom: number;
   onZoomChange: (z: number) => void;
   viewMode: ViewMode;
@@ -25,6 +26,7 @@ export const Viewport: React.FC<ViewportProps> = ({
   cmykPlates,
   settings,
   onSettingsChange,
+  onOpenFile,
   zoom,
   onZoomChange,
   viewMode,
@@ -367,8 +369,44 @@ export const Viewport: React.FC<ViewportProps> = ({
     setIsDraggingSplit(false);
   };
 
-  const imgW = originalImage ? originalImage.naturalWidth : 800;
-  const imgH = originalImage ? originalImage.naturalHeight : 800;
+  if (!originalImage) {
+    return (
+      <div
+        ref={containerRef}
+        className="flex-1 h-[calc(100vh-3.5rem)] relative bg-studio-bg overflow-hidden flex items-center justify-center p-6 select-none"
+      >
+        <div
+          onClick={onOpenFile}
+          className="flex flex-col items-center justify-center max-w-md w-full p-12 border-2 border-dashed border-studio-border hover:border-studio-accent rounded-sm cursor-pointer transition-all bg-studio-panel/40 hover:bg-studio-panel/75 group text-center"
+        >
+          <div className="w-14 h-14 rounded-sm bg-studio-card flex items-center justify-center border border-studio-border mb-4 group-hover:border-studio-accent transition-colors shadow-sm">
+            <Upload className="w-6 h-6 text-studio-muted group-hover:text-studio-accent transition-colors" />
+          </div>
+          <h3 className="text-sm font-semibold text-studio-text mb-1.5 tracking-wider uppercase">
+            Open Artwork File
+          </h3>
+          <p className="text-xs text-studio-muted mb-4 leading-relaxed max-w-xs">
+            Drag and drop your graphic here, or click to browse files
+          </p>
+          <div className="flex items-center gap-2 text-[11px] font-mono text-studio-muted/70 bg-studio-card/80 px-2.5 py-1 rounded-sm border border-studio-border">
+            <span>PNG</span>
+            <span>·</span>
+            <span>JPG</span>
+            <span>·</span>
+            <span>WEBP</span>
+            <span>·</span>
+            <span>TIFF</span>
+          </div>
+          <span className="text-[10px] text-studio-muted/50 mt-3 font-mono">
+            Transparent PNG recommended for DTF & Screen Printing
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const imgW = originalImage.naturalWidth;
+  const imgH = originalImage.naturalHeight;
 
   return (
     <div
