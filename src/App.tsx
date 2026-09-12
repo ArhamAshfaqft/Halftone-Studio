@@ -16,21 +16,21 @@ const DEFAULT_STUDIO_SETTINGS: StudioSettings = {
   angle: 45,
   shape: 'round',
   dotScale: 1.0,
-  dotFade: 25,
+  dotFade: 0,
   fadeFeather: 15,
-  knockoutMode: 'black',
+  knockoutMode: 'none',
   knockoutColor: '#000000',
-  knockoutThreshold: 18,
-  knockoutSoftness: 12,
+  knockoutThreshold: 12,
+  knockoutSoftness: 8,
   underbaseEnabled: true,
   underbaseChoke: 2,
   underbaseDensity: 100,
-  microDotCleanup: true,
+  microDotCleanup: false,
   microDotThreshold: 2,
   brightness: 0,
   contrast: 0,
   gamma: 1.0,
-  blackCutoff: 10,
+  blackCutoff: 0,
   inputBlack: 0,
   inputWhite: 255,
   outputMin: 0,
@@ -39,7 +39,7 @@ const DEFAULT_STUDIO_SETTINGS: StudioSettings = {
   garmentColor: '#121316',
   garmentTexture: true,
   garmentTextureOpacity: 35,
-  showGarmentBox: false,
+  showGarmentBox: true,
   garmentFolds: true,
   garmentFoldIntensity: 35,
   cmykMode: false,
@@ -162,17 +162,21 @@ export const App: React.FC = () => {
           // Standard Single Separation Halftone
           const ht = processHalftone(srcData, settings, 300);
           setHalftoneData(ht);
+        }
 
-          // Generate Choked White Underbase if enabled
-          if (settings.underbaseEnabled) {
-            const ub = generateWhiteUnderbase(ht, width, height, {
-              choke: settings.underbaseChoke,
-              density: settings.underbaseDensity,
-            });
-            setUnderbaseData(ub);
-          } else {
-            setUnderbaseData(null);
-          }
+        // Generate Choked White Underbase if enabled (from continuous artwork srcData)
+        if (settings.underbaseEnabled) {
+          const ub = generateWhiteUnderbase(srcData, width, height, {
+            choke: settings.underbaseChoke,
+            density: settings.underbaseDensity,
+            knockoutMode: settings.knockoutMode,
+            knockoutColor: settings.knockoutColor,
+            knockoutThreshold: settings.knockoutThreshold,
+            knockoutSoftness: settings.knockoutSoftness,
+          });
+          setUnderbaseData(ub);
+        } else {
+          setUnderbaseData(null);
         }
       } catch (err) {
         console.error('Prepress Pipeline Error:', err);

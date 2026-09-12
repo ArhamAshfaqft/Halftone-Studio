@@ -114,8 +114,6 @@ export const Viewport: React.FC<ViewportProps> = ({
 
     // Garment background renderer
     const drawGarmentBg = (targetCtx: CanvasRenderingContext2D) => {
-      if (!settings.showGarmentBox) return;
-
       drawGarmentBase(
         targetCtx,
         width,

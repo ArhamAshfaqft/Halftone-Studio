@@ -171,8 +171,8 @@ export function processHalftone(
       // Input levels remapping
       let normLum = Math.max(0, Math.min(1, (lum - inBlack) / (inWhite - inBlack)));
 
-      // Black cutoff: any values below threshold become black/knocked out
-      if (normLum * 255 <= blackCutoff) {
+      // Black cutoff: any values below threshold become knocked out
+      if (blackCutoff > 0 && normLum * 255 <= blackCutoff) {
         dst[idx + 3] = 0;
         continue;
       }
@@ -181,16 +181,18 @@ export function processHalftone(
       let density = outMin + normLum * (outMax - outMin);
       if (settings.invert) density = 1.0 - density;
 
-      // Edge Dot Fade: thins out dots toward outer borders & alpha edges
-      if (dotFade > 0) {
-        const distToBorder = Math.min(x, width - 1 - x, y, height - 1 - y);
-        const fadeWidth = Math.max(10, Math.min(width, height) * (dotFade * 0.25));
-        const borderFade = Math.min(1.0, distToBorder / fadeWidth);
+      // Edge Dot Fade: gracefully tapers dots along anti-aliased alpha boundaries
+      if (dotFade > 0 && a < 255) {
         const alphaFade = Math.pow(a / 255, 1.0 + dotFade * 2);
-        density *= (borderFade * alphaFade);
+        density *= alphaFade;
       }
 
-      if (density <= 0.01) {
+      // Suppress sub-threshold scum dots if microDotCleanup is active
+      const minDensity = settings.microDotCleanup
+        ? Math.max(0.01, (settings.microDotThreshold ?? 2) * 0.01)
+        : 0.005;
+
+      if (density < minDensity) {
         dst[idx + 3] = 0;
         continue;
       }
@@ -207,8 +209,7 @@ export function processHalftone(
       const dist = getDotDistance(cu, cv, settings.shape, x, y);
 
       // Threshold radius for current density
-      // For circle: area = pi * r^2 = density => r = sqrt(density / pi)
-      const maxRadius = 0.55 * Math.sqrt(density) * dotScaleFactor;
+      const maxRadius = 0.65 * Math.sqrt(density) * dotScaleFactor;
 
       if (dist <= maxRadius) {
         dst[idx] = r;
@@ -221,7 +222,7 @@ export function processHalftone(
     }
   }
 
-  // Micro-dot cleanup filter if enabled
+  // Micro-dot noise filter if enabled (only removes isolated 1-pixel stray specks)
   if (settings.microDotCleanup) {
     cleanupMicroDots(dst, width, height, settings.microDotThreshold);
   }
@@ -230,7 +231,7 @@ export function processHalftone(
 }
 
 /**
- * Removes isolated 1-pixel or 2-pixel stray dots that cause printer nozzle spitting.
+ * Removes isolated 1-pixel stray noise without destroying valid high-frequency halftone dots.
  */
 function cleanupMicroDots(
   dst: Uint8ClampedArray,
@@ -238,6 +239,7 @@ function cleanupMicroDots(
   height: number,
   threshold: number = 2
 ) {
+  if (threshold <= 1) return;
   const toClear: number[] = [];
 
   for (let y = 1; y < height - 1; y++) {
@@ -258,8 +260,8 @@ function cleanupMicroDots(
         }
       }
 
-      // If pixel is isolated with fewer than threshold neighbors, mark for deletion
-      if (neighbors < threshold) {
+      // Only delete if completely isolated (0 neighbors) to preserve legitimate halftone screen dots
+      if (neighbors === 0) {
         toClear.push(idx);
       }
     }
