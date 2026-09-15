@@ -149,12 +149,12 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({
                 <label htmlFor="license-key" className="text-xs font-medium text-studio-text flex items-center justify-between">
                   <span>Gumroad License Key</span>
                   <a
-                    href="https://gumroad.com"
+                    href="https://theravenlabs.gumroad.com/l/halftone-studio"
                     target="_blank"
                     rel="noreferrer"
                     className="text-[10px] text-studio-accent hover:underline flex items-center gap-1"
                   >
-                    <span>Find Key</span>
+                    <span>Get Key</span>
                     <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </label>
