@@ -24,6 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenFile,
   onOpenExportModal,
   onOpenLpiModal,
+  onOpenLicenseModal,
+  isLicensed,
   zoom,
   onZoomChange,
   onResetView,
