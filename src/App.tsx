@@ -4,12 +4,14 @@ import { Sidebar } from './components/Sidebar';
 import { Viewport } from './components/Viewport';
 import { ExportModal } from './components/ExportModal';
 import { LpiModal } from './components/LpiModal';
+import { LicenseModal } from './components/LicenseModal';
 import { StudioSettings, Preset, ViewMode } from './types';
 import { DEFAULT_PRESETS } from './presets';
 import { processHalftone } from './engine/halftoneCore';
 import { generateWhiteUnderbase } from './engine/underbaseEngine';
 import { processCmykSeparations, CMYKPlates } from './engine/cmykSeparation';
 import { analyzeAndAutoTune } from './engine/autoTone';
+import { getStoredLicense, LicenseInfo } from './engine/licenseEngine';
 
 const DEFAULT_STUDIO_SETTINGS: StudioSettings = {
   lpi: 45,
@@ -89,6 +91,10 @@ export const App: React.FC = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isLpiModalOpen, setIsLpiModalOpen] = useState<boolean>(false);
   const [resetViewTrigger, setResetViewTrigger] = useState<number>(0);
+
+  // Gumroad License State
+  const [licenseInfo, setLicenseInfo] = useState<LicenseInfo | null>(() => getStoredLicense());
+  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState<boolean>(() => !getStoredLicense());
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -276,6 +282,8 @@ export const App: React.FC = () => {
         onOpenFile={handleOpenFile}
         onOpenExportModal={() => setIsExportModalOpen(true)}
         onOpenLpiModal={() => setIsLpiModalOpen(true)}
+        onOpenLicenseModal={() => setIsLicenseModalOpen(true)}
+        isLicensed={!!licenseInfo}
         zoom={zoom}
         onZoomChange={setZoom}
         onResetView={() => setResetViewTrigger((v) => v + 1)}
@@ -328,6 +336,15 @@ export const App: React.FC = () => {
       <LpiModal
         isOpen={isLpiModalOpen}
         onClose={() => setIsLpiModalOpen(false)}
+      />
+
+      {/* Gumroad License Verification Modal */}
+      <LicenseModal
+        isOpen={isLicenseModalOpen}
+        onClose={() => setIsLicenseModalOpen(false)}
+        licenseInfo={licenseInfo}
+        onLicenseChange={setLicenseInfo}
+        isMandatory={!licenseInfo}
       />
     </div>
   );

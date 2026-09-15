@@ -121,3 +121,49 @@ ipcMain.handle('file:writeBuffer', async (_, { filePath, bufferData }: { filePat
     return { success: false, error: err?.message || 'Failed to save file' };
   }
 });
+
+ipcMain.handle('license:verify', async (_, licenseKey: string) => {
+  const cleanKey = (licenseKey || '').trim();
+  if (!cleanKey) return { success: false, message: 'Please enter a license key.' };
+
+  const params = new URLSearchParams();
+  params.append('product_id', 'DSmaPzQfRhVyw-LVGp2s8w==');
+  params.append('license_key', cleanKey);
+  params.append('increment_uses_count', 'true');
+
+  try {
+    const response = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      return { success: false, message: data.message || 'Invalid license key for this product.' };
+    }
+
+    const purchase = data.purchase || {};
+    if (purchase.refunded) return { success: false, message: 'This license has been refunded.' };
+    if (purchase.chargebacked || purchase.disputed) return { success: false, message: 'This license is disputed or chargebacked.' };
+    if (purchase.subscription_cancelled_at || purchase.subscription_failed_at) {
+      return { success: false, message: 'The subscription for this license has expired.' };
+    }
+
+    return {
+      success: true,
+      licenseInfo: {
+        key: cleanKey,
+        email: purchase.email || 'Verified Customer',
+        productName: purchase.product_name || 'Halftone Studio',
+        purchaseDate: purchase.created_at || new Date().toISOString(),
+        verifiedAt: Date.now(),
+        uses: data.uses || 1,
+      }
+    };
+  } catch (err: any) {
+    return { success: false, message: err?.message || 'Network error contacting Gumroad.' };
+  }
+});

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Upload, Download, Grid, RotateCcw, ZoomIn, ZoomOut, SlidersHorizontal } from 'lucide-react';
+import { Upload, Download, Grid, RotateCcw, ZoomIn, ZoomOut, SlidersHorizontal, Key } from 'lucide-react';
 import { Preset } from '../types';
 import { DEFAULT_PRESETS } from '../presets';
 
@@ -9,6 +9,8 @@ interface HeaderProps {
   onOpenFile: () => void;
   onOpenExportModal: () => void;
   onOpenLpiModal: () => void;
+  onOpenLicenseModal: () => void;
+  isLicensed: boolean;
   zoom: number;
   onZoomChange: (newZoom: number) => void;
   onResetView: () => void;
@@ -110,6 +112,20 @@ export const Header: React.FC<HeaderProps> = ({
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
         </div>
+
+        {/* License Activation / Status */}
+        <button
+          onClick={onOpenLicenseModal}
+          className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-sm border transition-colors ${
+            isLicensed
+              ? 'bg-studio-card hover:bg-studio-hover text-studio-text border-studio-border'
+              : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30'
+          }`}
+          title={isLicensed ? 'License Active' : 'Activate Software License'}
+        >
+          <Key className={`w-3.5 h-3.5 ${isLicensed ? 'text-emerald-400' : 'text-amber-400'}`} />
+          <span className="hidden lg:inline">{isLicensed ? 'Licensed' : 'Activate'}</span>
+        </button>
 
         {/* LPI Test Sheet Button */}
         <button
