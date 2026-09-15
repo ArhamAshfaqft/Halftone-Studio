@@ -4,7 +4,25 @@ import * as fs from 'fs';
 
 let mainWindow: BrowserWindow | null = null;
 
+function getAppIcon(): string | undefined {
+  const possiblePaths = [
+    path.join(__dirname, 'icon.ico'),
+    path.join(__dirname, 'icon.png'),
+    path.join(__dirname, '../build/icon.ico'),
+    path.join(__dirname, '../build/icon.png'),
+    path.join(__dirname, '../public/icon.png'),
+    path.join(process.resourcesPath, 'build/icon.ico'),
+    path.join(process.resourcesPath, 'build/icon.png'),
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return undefined;
+}
+
 function createWindow() {
+  const appIcon = getAppIcon();
+
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -12,6 +30,7 @@ function createWindow() {
     minHeight: 700,
     backgroundColor: '#0B0D11',
     title: 'Halftone Studio',
+    icon: appIcon,
     autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -34,6 +53,10 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  if (process.platform === 'win32') {
+    app.setAppUserModelId('com.halftonestudio.pro');
+  }
+
   createWindow();
 
   app.on('activate', () => {
